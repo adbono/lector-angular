@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "tiendatest-cb36f": {
+      "hosting": {
+        "lector-angular": [
+          "tiendatest-cb36f"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "tiendatest-cb36f"
+  }
+}
