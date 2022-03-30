@@ -1,1 +1,13 @@
-<p>user-list works!</p>
+<div class="container">
+    <h4 class="my-2">Usuarios</h4>
+    <input (keyup)="onChange($event)" type="text" class="form-control" placeholder="Busqueda" aria-label="Busqueda" aria-describedby="basic-addon1">
+    <ul class="list-group mt-2" *ngFor="let item of list">
+        <li class="list-group-item">
+          {{item.email}}
+          <span *ngFor="let rol of item.rol" class="badge rounded-pill bg-primary ms-1">{{rol}}</span>
+          <div class="float-end">
+            <button [routerLink]="['/user/', item.id]" type="button" class="btn btn-warning btn-sm me-1">Modificar</button>
+          </div>
+        </li>
+      </ul>
+</div>

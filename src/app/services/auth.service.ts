@@ -2,32 +2,28 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import firebase from 'firebase/compat/app';
-import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  roles: string[] = []
-
   constructor(
     private auth: AngularFireAuth,
     private fs: AngularFirestore) { }
 
   async createUserWithEmailAndPass(email: string, password: string){
+    await this.fs.collection('usuarios').doc()
     return await this.auth.createUserWithEmailAndPassword(email, password)
   }
 
   async loginWithGoogle(){
     let user = await this.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-    this.getUserRoles()
     return user
   }
   
   async login(email: string, password: string){
     let user = await this.auth.signInWithEmailAndPassword(email, password)
-    this.getUserRoles()
     return user
   }
 
@@ -35,36 +31,29 @@ export class AuthService {
     return await this.auth.signOut()
   }
 
-  getCurrentUser(){
-    return this.auth.user
+  getAuth(){
+    return this.auth
   }
 
-  async getUserRoles(){
-    let currentUser = await this.auth.currentUser
-    this.roles = []
-    await this.fs.collection('usuarios').doc(currentUser?.uid).get().forEach((e: any) => {
-      if(e.data() != null) this.roles = e.data().rol
+  getAllUsers(){
+    return this.fs.collection('usuarios').snapshotChanges()
+  }
+
+  getUser(id: string){
+    return this.fs.collection('usuarios').doc(id).get()
+  }
+
+  async addUserRol(user: firebase.User, roles: string[]){
+    return await this.fs.collection('usuarios').doc(user.uid).set({
+      email: user.email,
+      rol: roles
     })
-    return this.roles
   }
 
-  async addUserRol(rol: string){
-    let currentUser = await this.auth.currentUser
-    let currentRoles = await this.getUserRoles()
-    if(!currentRoles.includes(rol)) currentRoles.push(rol)
-    let rta = await this.fs.collection('usuarios').doc(currentUser?.uid).set({rol: currentRoles})
-    this.getUserRoles()
-    return rta
+  async updateUser(id: string, roles: string[]){
+    await this.fs.collection('usuarios').doc(id).update({rol: roles})
   }
 
-  async deleteUserRol(rol: string){
-    let currentUser = await this.auth.currentUser
-    let currentRoles = await this.getUserRoles()
-    currentRoles = currentRoles.filter(e => e != rol)
-    let rta = await this.fs.collection('usuarios').doc(currentUser?.uid).set({rol: currentRoles})
-    this.getUserRoles()
-    return rta
-  }
 
   async getRoles(){
     return await this.fs.collection('roles').get()
